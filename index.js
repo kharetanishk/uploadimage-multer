@@ -10,7 +10,7 @@ const mongourl = process.env.MONGO_URL;
 
 app.use("/upload", uploadRouter);
 
-app.use("/public", express.static(path.join(__dirname, "public")));
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")))
 
 async function main() {
   await mongoose
