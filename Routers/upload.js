@@ -2,18 +2,28 @@ const express = require("express");
 const { Router } = require("express");
 const uploadRouter = Router();
 const { UploadModel } = require("../db");
-const multer = require("multer");
-const upload = multer({ dest: "./public/uploads/" }); //UPLOADS IS A FOLDER HERE
 
-uploadRouter.use(express.urlencoded({ extended: true }));
+const multer = require("multer");
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./public/uploads");
+  },
+  filename: (req, file, cb) => {
+    const suffix = Date.now();
+    cb(null, `${suffix}-${file.originalname}`);
+  },
+});
+const upload = multer({ storage: storage });
+uploadRouter.use(express.urlencoded({ extended: false }));
+
 uploadRouter.post(
   "/image",
-  upload.single("profile-picture"), //UOLOAD.SINGLE LETS YOU UPLOAD SINGLE FILES
+  upload.single("profile-picture"),
   async function (req, res) {
     const { title } = req.body;
     const imagePath = req.file ? req.file.path : null;
 
-    if (!imagePath) {
+    if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
@@ -24,17 +34,16 @@ uploadRouter.post(
       });
 
       res.status(200).json({
-        message: "the database is created go check mf",
+        message: "Image uploaded and saved to DB",
+        imageUrl: `/uploads/${req.file.filename}`,
       });
     } catch (error) {
       console.log(error);
+      res.status(500).json({ message: "Server error" });
     }
   }
 );
 
 module.exports = {
-  uploadRouter: uploadRouter,
+  uploadRouter,
 };
-
-//I KNOW USING MULTER THIS ROUTER IS  A MIDDLEWARE NOT A ROUTER, BUT STILL
-//I AM DOING IT EXPLICITLY COZ I KNOW WHAT I AM DOING

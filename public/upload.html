@@ -3,27 +3,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Upload inages</title>
+    <title>Upload Images</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   </head>
   <body>
     <div class="container">
-      <div id="heading">
-        <h1>THIS SITE LETS YOU UPLOAD YOUR IMAGES</h1>
-      </div>
-      <div>
-        <form
-          action="/upload/image"
-          method="post"
-          enctype="multipart/form-data"
-        >
-          <input type="text" name="title" placeholder="Enter image title" />
-          <input type="file" name="profile-picture" />
-          <button type="submit">UPLOAD</button>
-        </form>
-      </div>
-      <div class="uploadings">
-        <p>Here the images will be pushed</p>
-      </div>
+      <h1>Upload Your Image</h1>
+      <form
+        id="form-upload"
+        enctype="multipart/form-data"
+        method="post"
+        action="/upload/image"
+      >
+        <input type="text" name="title" placeholder="Enter image title" />
+        <input type="file" name="profile-picture" />
+        <button type="submit">UPLOAD</button>
+      </form>
+
+      <img id="image" style="display: none" width="300" height="200" />
     </div>
+
+    <script>
+      const form = document.getElementById("form-upload");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        try {
+          const response = await axios.post(
+            "http://localhost:6262/upload/image",
+            formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+
+          console.log("Server response:", response.data);
+
+          const imageElement = document.getElementById("image");
+          imageElement.src = `${window.location.origin}/public${response.data.imageUrl}`;
+          imageElement.style.display = "block";
+        } catch (error) {
+          console.error("Upload failed:", error);
+          alert("Upload failed");
+        }
+      });
+    </script>
   </body>
 </html>
